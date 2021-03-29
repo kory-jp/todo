@@ -1,0 +1,37 @@
+version: "3"
+services:
+  db:
+    image: mariadb
+    command: mysqld --character-set-server=utf8 --collation-server=utf8_unicode_ci
+    environment:
+      MYSQL_DATABASE: "todo_development"
+      MYSQL_ROOT_PASSWORD: "password"
+    volumes:
+      - mysql-data:/var/lib/mysql/data
+      - /tmp/dockerdir:/etc/mysql/conf.d/
+    ports:
+      - 3306:3306
+  web:
+    build: ./back
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3001 -b '0.0.0.0'"
+    volumes:
+      - ./back:/todo
+    ports:
+      - "3001:3001"
+    depends_on:
+      - db
+    stdin_open: true
+    tty: true
+  node:
+    build:
+      context: ./front
+      dockerfile: Dockerfile_node
+    volumes:
+      - ./front:/usr/src/app/todo/front
+    command: sh -c "cd todo_front && npm start --host 0.0.0.0 --port 3000"
+    ports:
+      - "3000:3000"
+    stdin_open: true
+    tty: true
+volumes:
+  mysql-data: {}
