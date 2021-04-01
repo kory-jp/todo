@@ -7,7 +7,7 @@ module Api
         end
 
         def show
-          list = List.find(params[id])
+          list = List.find(params[:id])
           render json: list
         end
 
